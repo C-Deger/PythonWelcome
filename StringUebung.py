@@ -1,20 +1,34 @@
 #Strings üben 
 
-vorname = input("Was ist dein Vorname?")
 
 # Nachname validieren: nur Buchstaben und Bindestriche
-def ist_gueltiger_nachname(name):
+def ist_gueltiger_name(name):
     name = name.strip()
     if not name:
         return False
-    if name.startswith("-") or name.endswith("-"):
+
+    # erlaubte Zeichen: Buchstaben, Leerzeichen, Bindestrich
+    if not all(char.isalpha() or char in "-" or char == " " for char in name):
         return False
-    if "--" in name:
-        return False
-    return all(char.isalpha() or char == "-" for char in name)
+
+    # keine Bindestriche am Anfang/Ende jeder Wortkomponente
+    parts = [p for p in name.split() if p]
+    for part in parts:
+        if part.startswith("-") or part.endswith("-"):
+            return False
+        if "--" in part:
+            return False
+
+    return True
+
+vorname = input("Was ist dein Vorname?")
+while not ist_gueltiger_name(vorname):
+    print("Der Vorname darf nur Buchstaben und Bindestriche enthalten (z. B. Marie-Michelle).")
+    vorname = input("Was ist dein Vorname?")
+
 
 nachname = input("Was ist dein Nachname?")
-while not ist_gueltiger_nachname(nachname):
+while not ist_gueltiger_name(nachname):
     print("Der Nachname darf nur Buchstaben und Bindestriche enthalten (z. B. Müller-Schmidt).")
     nachname = input("Was ist dein Nachname?")
 
@@ -22,15 +36,15 @@ while not ist_gueltiger_nachname(nachname):
 vorname = vorname.strip()
 nachname = nachname.strip()
 
-# Vorname in Teile splitten (z.B. "Anna Maria")
-vornamen_teile = [teil for teil in vorname.split() if teil]
+# Gemeinsame Funktion: Trennt bei Leerzeichen + Bindestrichen
+# Beispiel: "Anna Maria" -> ["Anna", "Maria"]
+# Beispiel: "Müller-Schmidt" -> ["Müller", "Schmidt"]
+# Beispiel: "Anna Maria-Maria" -> ["Anna", "Maria", "Maria"]
+def split_name_parts(name):
+    return [teil for token in name.split() for teil in token.split("-") if teil]
 
-# Nachname kann Bindestrich enthalten (z.B. "Müller-Schmidt")
-# dann behandeln wir es wie zwei Teile, damit beide Initialien genutzt werden
-nachnamen_teile = []
-for teil in nachname.split():
-    hyphen_teile = teil.split("-")
-    nachnamen_teile.extend([h for h in hyphen_teile if h])
+vornamen_teile = split_name_parts(vorname)
+nachnamen_teile = split_name_parts(nachname)
 
 if not vornamen_teile:
     vornamen_teile = ["?"]
